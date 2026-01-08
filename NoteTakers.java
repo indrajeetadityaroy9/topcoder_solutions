@@ -1,5 +1,6 @@
 import java.util.*;
 
+// Solution: all-pairs shortest paths + bipartite matching for minimum path cover.
 public class NoteTakers{
     public int[] solve(int N, int[] X, int[] Y, int[] D, int[] B, int[]T1, int[]T2){
         int M = B.length;
@@ -28,14 +29,14 @@ public class NoteTakers{
                 }
             }
         }
-        List<Integer>[] adj = new ArrayList[M];
-        for(int i=0; i<M; i++) adj[i] = new ArrayList<>();
+        List<List<Integer>> adj = new ArrayList<>(M);
+        for(int i=0; i<M; i++) adj.add(new ArrayList<>());
         for(int i=0; i<M; i++){
             for(int j=0; j<M; j++){
                 if(i != j){
                     long d = dist[B[i]][B[j]];
                     if(d != INF && (long)T2[i] + d <= (long)T1[j]){
-                        adj[i].add(j);
+                        adj.get(i).add(j);
                     }
                 }
             }
@@ -45,7 +46,7 @@ public class NoteTakers{
         int matching = 0;
         for(int u=0; u<M; u++){
             boolean[] seen = new boolean[M];
-            if(dfsAugment(u,adj,matchR,seen)) matching++;
+            if(dfsAugment(u, adj, matchR, seen)) matching++;
         }
         int[] succ = new int[M];
         int[] pred = new int[M];
@@ -66,6 +67,7 @@ public class NoteTakers{
                     answer.add(curr);
                     curr = succ[curr];
                 }
+                // -1 separates chains in the path cover.
                 answer.add(-1);
             }
         }
@@ -74,8 +76,8 @@ public class NoteTakers{
         for(int i=0; i<res.length; i++) res[i] = answer.get(i);
         return res;
     }
-    private boolean dfsAugment(int u, List<Integer>[] adj, int[] matchR, boolean[] seen){
-        for(int v: adj[u]){
+    private boolean dfsAugment(int u, List<List<Integer>> adj, int[] matchR, boolean[] seen){
+        for(int v: adj.get(u)){
             if(seen[v]) continue;
             seen[v] = true;
             if(matchR[v] == -1 || dfsAugment(matchR[v], adj, matchR, seen)){
